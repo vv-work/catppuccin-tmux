@@ -31,6 +31,43 @@ set -g default-terminal "tmux-256color"   # or "screen-256color"
 # A Nerd Font is recommended for the glyphs used in the statusline
 ```
 
+To re-enable truecolor explicitly (if your terminal supports it):
+
+```tmux
+set -g @catppuccin_truecolor on
+```
+
+### Configuration Examples
+
+256-color setup (default):
+
+```tmux
+# TPM
+set -g @plugin 'catppuccin/tmux'
+
+# Use 256-color terminfo and do not force truecolor
+set -g default-terminal "tmux-256color"   # or screen-256color
+# no terminal-overrides "*:Tc" here
+
+# Optional: choose flavour
+set -g @catppuccin_flavour 'mocha'
+```
+
+Truecolor setup (opt-in):
+
+```tmux
+# TPM
+set -g @plugin 'catppuccin/tmux'
+
+# Enable truecolor in the plugin and tmux
+set -g @catppuccin_truecolor on
+set -g default-terminal "tmux-256color"
+set -as terminal-overrides ",*:Tc"
+
+# Optional: choose flavour
+set -g @catppuccin_flavour 'mocha'
+```
+
 ## Themes
 
 - 🌻 [Latte](./catppuccin-latte.tmuxtheme)

@@ -1,6 +1,51 @@
 #!/usr/bin/env bash
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Convert an RGB hex color to closest xterm-256 colourNN
+hex_to_xterm256() {
+  local hex=${1#\#}
+  local r=$((16#${hex:0:2}))
+  local g=$((16#${hex:2:2}))
+  local b=$((16#${hex:4:2}))
+  awk -v r="$r" -v g="$g" -v b="$b" '
+  function comp(a,b){d=a-b; return d*d}
+  BEGIN{
+    min=1e9; idx=0;
+    # 0..15 system colors
+    split("0,0,0 128,0,0 0,128,0 128,128,0 0,0,128 128,0,128 0,128,128 192,192,192 128,128,128 255,0,0 0,255,0 255,255,0 0,0,255 255,0,255 0,255,255 255,255,255", arr, " ");
+    for(i=0;i<16;i++){split(arr[i+1], rgb, ","); d=comp(r,rgb[1])+comp(g,rgb[2])+comp(b,rgb[3]); if(d<min){min=d; idx=i}}
+    # 16..231 color cube
+    split("0 95 135 175 215 255", lvl, " ");
+    for(ri=0;ri<6;ri++) for(gi=0;gi<6;gi++) for(bi=0;bi<6;bi++){
+      rr=lvl[ri+1]; gg=lvl[gi+1]; bb=lvl[bi+1]; d=comp(r,rr)+comp(g,gg)+comp(b,bb); id=16+36*ri+6*gi+bi; if(d<min){min=d; idx=id}
+    }
+    # 232..255 grayscale
+    for(i=0;i<24;i++){val=8+i*10; d=comp(r,val)+comp(g,val)+comp(b,val); id=232+i; if(d<min){min=d; idx=id}}
+    print "colour" idx
+  }'
+}
+
+convert_theme_to_256_if_needed() {
+  local truecolor
+  truecolor="$(get_tmux_option "@catppuccin_truecolor" "off")"
+  if [[ "$truecolor" == "on" ]]; then
+    return 0
+  fi
+  thm_bg=$(hex_to_xterm256 "$thm_bg")
+  thm_fg=$(hex_to_xterm256 "$thm_fg")
+  thm_cyan=$(hex_to_xterm256 "$thm_cyan")
+  thm_black=$(hex_to_xterm256 "$thm_black")
+  thm_gray=$(hex_to_xterm256 "$thm_gray")
+  thm_magenta=$(hex_to_xterm256 "$thm_magenta")
+  thm_pink=$(hex_to_xterm256 "$thm_pink")
+  thm_red=$(hex_to_xterm256 "$thm_red")
+  thm_green=$(hex_to_xterm256 "$thm_green")
+  thm_yellow=$(hex_to_xterm256 "$thm_yellow")
+  thm_blue=$(hex_to_xterm256 "$thm_blue")
+  thm_orange=$(hex_to_xterm256 "$thm_orange")
+  thm_black4=$(hex_to_xterm256 "$thm_black4")
+}
+
 get_tmux_option() {
   local option value default
   option="$1"
@@ -37,6 +82,9 @@ main() {
   # variables.
   # shellcheck source=catppuccin-frappe.tmuxtheme
   source /dev/stdin <<<"$(sed -e "/^[^#].*=/s/^/local /" "${PLUGIN_DIR}/catppuccin-${theme}.tmuxtheme")"
+
+  # Convert palette to 256-color equivalents unless truecolor is enabled
+  convert_theme_to_256_if_needed
 
   # status
   set status "on"
