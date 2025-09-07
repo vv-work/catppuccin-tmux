@@ -15,6 +15,22 @@
   <img src="./assets/preview.webp"/>
 </p>
 
+## Fork Notice: 256‑Color Focus
+
+This repository is a fork of catppuccin/tmux adapted for environments limited to the tmux 256‑color palette (no truecolor). The Catppuccin palette is mapped to the nearest 256‑color equivalents to keep contrast and readability on servers, minimal terminals, and remote sessions.
+
+Recommended tmux settings:
+
+```tmux
+# Use a 256‑color terminfo
+set -g default-terminal "tmux-256color"   # or "screen-256color"
+
+# Ensure truecolor is NOT forced (omit Tc). If present, remove/comment:
+# set -as terminal-overrides ",*:Tc"
+
+# A Nerd Font is recommended for the glyphs used in the statusline
+```
+
 ## Themes
 
 - 🌻 [Latte](./catppuccin-latte.tmuxtheme)
